@@ -7,7 +7,7 @@ const http = require('http');
 const router = require('./routes/index');
 // setup mongoose
 const mongoose = require('mongoose');
-require('./config/mongoose');
+// require('./config/mongoose');
 
 const app = express();
 const port = 3000;

@@ -8,11 +8,34 @@ const router = require('./routes/index');
 // setup mongoose
 const mongoose = require('mongoose');
 // require('./config/mongoose');
+const rateLimit = require('express-rate-limit');
+const cron = require('node-cron');
+require('./config/redis');
 
 const app = express();
 const port = 3000;
 
+// Create a rate limiter
+const limiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 15 minutes
+    max: 5,                 // limit each IP to 100 requests per window
+    message: 'Too many requests from this IP, please try again later.'
+});
+// Apply to all requests
+app.use(limiter);
 app.use(bodyParser.json());
+
+cron.schedule('*/5 * * * * *', () => {
+    console.log('Running every 1 seconds');
+});
+
+// client.connect().then(async () => {
+//     await client.set("mykey", "Hello World1");
+//     console.log(await client.get("mykey"));
+// });
+
+// client.set("mykey", "Hello World1");
+// console.log(client.get("mykey"));
 
 app.use('/', router);
  

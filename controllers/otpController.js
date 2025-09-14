@@ -2,6 +2,7 @@ const { generateOTP } = require('../utilities/helper');
 const Otp = require('../models/otp');
 const FAST2SMS_API = "sXkzhZWvA6gUIp5rOkaOU5NqZOifbjS1i3fUpwMC5Pn4D7HGGwF5QiGkwS2H";
 var unirest = require("unirest");
+const client = require('../config/redis');
 
 module.exports.sendOtpController = async (req, res) => {
     try {
@@ -66,6 +67,20 @@ module.exports.verifyOtpController = async (req, res) => {
         await Otp.deleteMany({ mobile }); // delete all the OTPs for that mobile number
         return res.status(200).json({
             message: 'OTP verified successfully'
+        });
+    } catch(err) {
+        console.log(err);
+        return res.status(500).json({
+            message: 'Internal Server Error'
+        });
+    }
+}
+
+module.exports.sampleController = async (req, res) => {
+    try {
+        const message = await client.get('mykey');
+        return res.status(200).json({
+            message: message
         });
     } catch(err) {
         console.log(err);

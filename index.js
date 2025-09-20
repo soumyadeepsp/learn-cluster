@@ -14,6 +14,30 @@ require('./config/redis');
 
 const app = express();
 const port = 3000;
+const CLIENT_ID = "";
+const CLIENT_SECRET = "";
+const REDIRECT_URI = "http://localhost:3000/auth/callback";
+const Oauth2Client = require('google-auth-library').OAuth2Client;
+const client = new Oauth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
+
+app.get('/auth/google', (req, res) => {
+    const authUrl = client.generateAuthUrl({
+        access_type: 'offline',
+        scope: ['https://www.googleapis.com/auth/userinfo.profile'],
+        redirect_uri: REDIRECT_URI
+    });
+    console.log(authUrl);
+    res.redirect(authUrl);
+});
+
+app.get('/auth/callback', async (req, res) => {
+    const code = req.query.code;
+    const { tokens } = await client.getToken(code);
+    client.setCredentials(tokens);
+    console.log(tokens.id_token);
+    // send the token in the response
+    res.send({ token: tokens.id_token, message: "Login Successful" });
+});
 
 // Create a rate limiter
 const limiter = rateLimit({
@@ -25,9 +49,9 @@ const limiter = rateLimit({
 app.use(limiter);
 app.use(bodyParser.json());
 
-cron.schedule('*/5 * * * * *', () => {
-    console.log('Running every 1 seconds');
-});
+// cron.schedule('*/5 * * * * *', () => {
+//     console.log('Running every 1 seconds');
+// });
 
 // client.connect().then(async () => {
 //     await client.set("mykey", "Hello World1");
